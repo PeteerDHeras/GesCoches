@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ vehiculo.matricula }} - GesCoches{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Vehículo: {{ vehiculo.matricula }}</h2>
+    <a href="/admin/vehiculos/vehiculo/{{ vehiculo.id }}/change/" class="btn btn-primary">Editar</a>
+</div>
+
+<div class="detail-grid">
+    <div class="detail-card">
+        <h3>Información del Vehículo</h3>
+        <table class="info-table">
+            <tr>
+                <th>Matrícula:</th>
+                <td><strong>{{ vehiculo.matricula }}</strong></td>
+            </tr>
+            <tr>
+                <th>Marca:</th>
+                <td>{{ vehiculo.marca }}</td>
+            </tr>
+            <tr>
+                <th>Modelo:</th>
+                <td>{{ vehiculo.modelo }}</td>
+            </tr>
+            <tr>
+                <th>Color:</th>
+                <td>{{ vehiculo.color }}</td>
+            </tr>
+            <tr>
+                <th>Año:</th>
+                <td>{{ vehiculo.año }}</td>
+            </tr>
+            <tr>
+                <th>Estado:</th>
+                <td>
+                    <span class="badge badge-{{ vehiculo.estado|lower }}">
+                        {{ vehiculo.get_estado_display }}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>Kilometraje:</th>
+                <td>{{ vehiculo.kilometraje }} km</td>
+            </tr>
+            <tr>
+                <th>Fecha de Alta:</th>
+                <td>{{ vehiculo.fecha_alta|date:"d/m/Y" }}</td>
+            </tr>
+            <tr>
+                <th>Última Revisión:</th>
+                <td>{% if vehiculo.fecha_ultima_revision %}{{ vehiculo.fecha_ultima_revision|date:"d/m/Y" }}{% else %}Sin revisión{% endif %}</td>
+            </tr>
+        </table>
+        {% if vehiculo.observaciones %}
+        <div class="observaciones">
+            <h4>Observaciones:</h4>
+            <p>{{ vehiculo.observaciones }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="detail-card">
+        <h3>Historial de Asignaciones</h3>
+        {% if asignaciones %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Inicio</th>
+                    <th>Fin</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asignacion in asignaciones %}
+                <tr>
+                    <td>{{ asignacion.cliente }}</td>
+                    <td>{{ asignacion.fecha_inicio|date:"d/m/Y" }}</td>
+                    <td>{% if asignacion.fecha_fin %}{{ asignacion.fecha_fin|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+                    <td>
+                        {% if asignacion.activa %}
+                        <span class="badge badge-en_uso">Activa</span>
+                        {% else %}
+                        <span class="badge badge-baja">Finalizada</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="no-data">Sin asignaciones registradas</p>
+        {% endif %}
+    </div>
+
+    <div class="detail-card">
+        <h3>Historial de Mantenimientos</h3>
+        {% if mantenimientos %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                    <th>Coste</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mantenimiento in mantenimientos %}
+                <tr>
+                    <td>{{ mantenimiento.get_tipo_display }}</td>
+                    <td>{{ mantenimiento.fecha_entrada|date:"d/m/Y" }}</td>
+                    <td>{{ mantenimiento.coste }} €</td>
+                    <td>
+                        {% if mantenimiento.completado %}
+                        <span class="badge badge-disponible">Completado</span>
+                        {% else %}
+                        <span class="badge badge-mantenimiento">En curso</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="no-data">Sin mantenimientos registrados</p>
+        {% endif %}
+    </div>
+</div>
+
+<a href="{% url 'vehiculos:lista_vehiculos' %}" class="btn btn-secondary">← Volver a la lista</a>
+
+{% endblock %}

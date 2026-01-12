@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - GesCoches{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h2>Dashboard de Vehículos</h2>
+    
+    <div class="stats-grid">
+        <div class="stat-card total">
+            <div class="stat-icon">🚗</div>
+            <div class="stat-content">
+                <h3>Total Vehículos</h3>
+                <p class="stat-number">{{ total_vehiculos }}</p>
+            </div>
+        </div>
+        
+        <div class="stat-card disponible">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+                <h3>Disponibles</h3>
+                <p class="stat-number">{{ disponibles }}</p>
+            </div>
+        </div>
+        
+        <div class="stat-card en-uso">
+            <div class="stat-icon">🔑</div>
+            <div class="stat-content">
+                <h3>En Uso</h3>
+                <p class="stat-number">{{ en_uso }}</p>
+            </div>
+        </div>
+        
+        <div class="stat-card mantenimiento">
+            <div class="stat-icon">🔧</div>
+            <div class="stat-content">
+                <h3>Mantenimiento</h3>
+                <p class="stat-number">{{ en_mantenimiento }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-sections">
+        <div class="section">
+            <h3>Asignaciones Activas</h3>
+            {% if asignaciones_activas %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Vehículo</th>
+                        <th>Cliente</th>
+                        <th>Fecha Inicio</th>
+                        <th>Km Salida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asignacion in asignaciones_activas %}
+                    <tr>
+                        <td><strong>{{ asignacion.vehiculo.matricula }}</strong></td>
+                        <td>{{ asignacion.cliente }}</td>
+                        <td>{{ asignacion.fecha_inicio|date:"d/m/Y H:i" }}</td>
+                        <td>{{ asignacion.kilometraje_salida }} km</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="{% url 'vehiculos:lista_asignaciones' %}" class="btn btn-link">Ver todas las asignaciones →</a>
+            {% else %}
+            <p class="no-data">No hay asignaciones activas</p>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h3>Mantenimientos Pendientes</h3>
+            {% if mantenimientos_pendientes %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Vehículo</th>
+                        <th>Tipo</th>
+                        <th>Fecha Entrada</th>
+                        <th>Coste</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mantenimiento in mantenimientos_pendientes %}
+                    <tr>
+                        <td><strong>{{ mantenimiento.vehiculo.matricula }}</strong></td>
+                        <td>{{ mantenimiento.get_tipo_display }}</td>
+                        <td>{{ mantenimiento.fecha_entrada|date:"d/m/Y" }}</td>
+                        <td>{{ mantenimiento.coste }} €</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="{% url 'vehiculos:lista_mantenimientos' %}" class="btn btn-link">Ver todos los mantenimientos →</a>
+            {% else %}
+            <p class="no-data">No hay mantenimientos pendientes</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

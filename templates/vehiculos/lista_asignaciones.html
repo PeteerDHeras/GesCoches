@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Asignaciones - GesCoches{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Asignaciones</h2>
+    <a href="/admin/vehiculos/asignacion/add/" class="btn btn-primary">+ Nueva Asignación</a>
+</div>
+
+<div class="filters">
+    <a href="?filtro=activas" class="filter-btn {% if filtro == 'activas' %}active{% endif %}">Activas</a>
+    <a href="?filtro=finalizadas" class="filter-btn {% if filtro == 'finalizadas' %}active{% endif %}">Finalizadas</a>
+    <a href="?filtro=todas" class="filter-btn {% if filtro == 'todas' %}active{% endif %}">Todas</a>
+</div>
+
+{% if asignaciones %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Vehículo</th>
+            <th>Cliente</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Km Salida</th>
+            <th>Km Entrada</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for asignacion in asignaciones %}
+        <tr>
+            <td><strong>{{ asignacion.vehiculo.matricula }}</strong></td>
+            <td>{{ asignacion.cliente }}</td>
+            <td>{{ asignacion.fecha_inicio|date:"d/m/Y H:i" }}</td>
+            <td>{% if asignacion.fecha_fin %}{{ asignacion.fecha_fin|date:"d/m/Y H:i" }}{% else %}-{% endif %}</td>
+            <td>{{ asignacion.kilometraje_salida }} km</td>
+            <td>{% if asignacion.kilometraje_entrada %}{{ asignacion.kilometraje_entrada }} km{% else %}-{% endif %}</td>
+            <td>
+                {% if asignacion.activa %}
+                <span class="badge badge-en_uso">Activa</span>
+                {% else %}
+                <span class="badge badge-baja">Finalizada</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="/admin/vehiculos/asignacion/{{ asignacion.id }}/change/" class="btn btn-sm">Ver/Editar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="no-data">No hay asignaciones registradas</p>
+{% endif %}
+
+{% endblock %}

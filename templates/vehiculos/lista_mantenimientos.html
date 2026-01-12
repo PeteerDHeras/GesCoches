@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Mantenimientos - GesCoches{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Mantenimientos</h2>
+    <a href="/admin/vehiculos/mantenimiento/add/" class="btn btn-primary">+ Nuevo Mantenimiento</a>
+</div>
+
+<div class="filters">
+    <a href="?filtro=pendientes" class="filter-btn {% if filtro == 'pendientes' %}active{% endif %}">Pendientes</a>
+    <a href="?filtro=completados" class="filter-btn {% if filtro == 'completados' %}active{% endif %}">Completados</a>
+    <a href="?filtro=todos" class="filter-btn {% if filtro == 'todos' %}active{% endif %}">Todos</a>
+</div>
+
+{% if mantenimientos %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Vehículo</th>
+            <th>Tipo</th>
+            <th>Fecha Entrada</th>
+            <th>Fecha Salida</th>
+            <th>Coste</th>
+            <th>Taller</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mantenimiento in mantenimientos %}
+        <tr>
+            <td><strong>{{ mantenimiento.vehiculo.matricula }}</strong></td>
+            <td>{{ mantenimiento.get_tipo_display }}</td>
+            <td>{{ mantenimiento.fecha_entrada|date:"d/m/Y" }}</td>
+            <td>{% if mantenimiento.fecha_salida %}{{ mantenimiento.fecha_salida|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+            <td>{{ mantenimiento.coste }} €</td>
+            <td>{{ mantenimiento.taller|default:"-" }}</td>
+            <td>
+                {% if mantenimiento.completado %}
+                <span class="badge badge-disponible">Completado</span>
+                {% else %}
+                <span class="badge badge-mantenimiento">En curso</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="/admin/vehiculos/mantenimiento/{{ mantenimiento.id }}/change/" class="btn btn-sm">Ver/Editar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="no-data">No hay mantenimientos registrados</p>
+{% endif %}
+
+{% endblock %}
