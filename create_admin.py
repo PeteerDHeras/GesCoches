@@ -1,15 +1,22 @@
 #!/usr/bin/env python
 import os
+import sys
 import django
-from django.contrib.auth.models import User
 
+# Configurar Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gescoches.settings')
+
+# Agregar el directorio del proyecto al path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 django.setup()
+
+from django.contrib.auth.models import User
 
 # Datos del admin
 USERNAME = 'admin'
 EMAIL = 'admin@gescoches.com'
-PASSWORD = 'Admin123456'
+PASSWORD = 'baleares9'
 
 # Crear superuser si no existe
 if not User.objects.filter(username=USERNAME).exists():
