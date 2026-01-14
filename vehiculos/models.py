@@ -1,13 +1,14 @@
 from django.db import models
 from django.core.validators import RegexValidator
 from django.utils import timezone
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
 
 
 class EstadoVehiculo(models.TextChoices):
     """Estados posibles de un vehículo de sustitución"""
     DISPONIBLE = 'DISPONIBLE', 'Disponible'
     EN_USO = 'EN_USO', 'En Uso'
-    MANTENIMIENTO = 'MANTENIMIENTO', 'Mantenimiento/Reparación'
     BAJA = 'BAJA', 'Dado de Baja'
 
 
@@ -147,78 +148,27 @@ class Asignacion(models.Model):
         self.vehiculo.save()
 
 
-class Mantenimiento(models.Model):
-    """Registro de mantenimientos y reparaciones"""
-    
-    TIPO_CHOICES = [
-        ('REVISION', 'Revisión'),
-        ('REPARACION', 'Reparación'),
-        ('ITV', 'ITV'),
-        ('NEUMATICOS', 'Cambio de Neumáticos'),
-        ('OTROS', 'Otros'),
-    ]
-    
-    vehiculo = models.ForeignKey(
-        Vehiculo,
-        on_delete=models.CASCADE,
-        related_name='mantenimientos',
-        verbose_name='Vehículo'
-    )
-    
-    tipo = models.CharField(
-        max_length=15,
-        choices=TIPO_CHOICES,
-        verbose_name='Tipo de Mantenimiento'
-    )
-    
-    fecha_entrada = models.DateField(
-        default=timezone.now,
-        verbose_name='Fecha de Entrada'
-    )
-    
-    fecha_salida = models.DateField(
-        null=True,
-        blank=True,
-        verbose_name='Fecha de Salida'
-    )
-    
-    descripcion = models.TextField(
-        verbose_name='Descripción del Trabajo'
-    )
-    
-    coste = models.DecimalField(
-        max_digits=8,
-        decimal_places=2,
-        default=0,
-        verbose_name='Coste (€)'
-    )
-    
-    taller = models.CharField(
-        max_length=100,
-        blank=True,
-        verbose_name='Taller/Proveedor'
-    )
-    
-    completado = models.BooleanField(
-        default=False,
-        verbose_name='Trabajo Completado'
-    )
-    
-    class Meta:
-        verbose_name = 'Mantenimiento'
-        verbose_name_plural = 'Mantenimientos'
-        ordering = ['-fecha_entrada']
-    
-    def __str__(self):
-        return f"{self.vehiculo.matricula} - {self.get_tipo_display()} ({self.fecha_entrada})"
-    
-    def finalizar(self, fecha_salida=None):
-        """Marca el mantenimiento como completado"""
-        self.completado = True
-        self.fecha_salida = fecha_salida or timezone.now().date()
-        self.save()
+# Signals para automatizar estados de vehículos
+@receiver(post_save, sender=Asignacion)
+def actualizar_estado_vehiculo_en_asignacion(sender, instance, created, **kwargs):
+    """
+    Automáticamente cambia el estado del vehículo a EN_USO cuando se crea una asignación activa.
+    Si la asignación se marca como inactiva, vuelve el vehículo a DISPONIBLE.
+    """
+    if instance.activa:
+        # Si la asignación está activa, el vehículo debe estar EN_USO
+        if instance.vehiculo.estado != EstadoVehiculo.EN_USO:
+            instance.vehiculo.estado = EstadoVehiculo.EN_USO
+            instance.vehiculo.save(update_fields=['estado'])
+    else:
+        # Si la asignación se finaliza, verificar si hay otras asignaciones activas
+        tiene_otras_asignaciones_activas = Asignacion.objects.filter(
+            vehiculo=instance.vehiculo,
+            activa=True
+        ).exclude(id=instance.id).exists()
         
-        # Actualizar estado del vehículo a disponible
-        self.vehiculo.estado = EstadoVehiculo.DISPONIBLE
-        self.vehiculo.fecha_ultima_revision = self.fecha_salida
-        self.vehiculo.save()
+        if not tiene_otras_asignaciones_activas:
+            # No hay otras asignaciones activas, marcar como DISPONIBLE
+            if instance.vehiculo.estado != EstadoVehiculo.DISPONIBLE:
+                instance.vehiculo.estado = EstadoVehiculo.DISPONIBLE
+                instance.vehiculo.save(update_fields=['estado'])

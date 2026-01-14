@@ -2,34 +2,30 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
 from django.contrib import messages
-from .models import Vehiculo, Asignacion, Mantenimiento, EstadoVehiculo
+from .models import Vehiculo, Asignacion, EstadoVehiculo
 
 
 @login_required
 def dashboard(request):
-    """Vista principal del dashboard con estadísticas"""
+    """Vista principal del dashboard con estadísticas y lista de vehículos"""
     
     # Contar vehículos por estado
     total_vehiculos = Vehiculo.objects.count()
     disponibles = Vehiculo.objects.filter(estado=EstadoVehiculo.DISPONIBLE).count()
     en_uso = Vehiculo.objects.filter(estado=EstadoVehiculo.EN_USO).count()
-    en_mantenimiento = Vehiculo.objects.filter(estado=EstadoVehiculo.MANTENIMIENTO).count()
+    
+    # Lista completa de vehículos con su estado
+    vehiculos = Vehiculo.objects.all().order_by('estado', 'matricula')
     
     # Asignaciones activas recientes
     asignaciones_activas = Asignacion.objects.filter(activa=True).select_related('vehiculo')[:5]
-    
-    # Mantenimientos pendientes
-    mantenimientos_pendientes = Mantenimiento.objects.filter(
-        completado=False
-    ).select_related('vehiculo')[:5]
     
     context = {
         'total_vehiculos': total_vehiculos,
         'disponibles': disponibles,
         'en_uso': en_uso,
-        'en_mantenimiento': en_mantenimiento,
+        'vehiculos': vehiculos,
         'asignaciones_activas': asignaciones_activas,
-        'mantenimientos_pendientes': mantenimientos_pendientes,
     }
     
     return render(request, 'vehiculos/dashboard.html', context)
@@ -61,12 +57,10 @@ def detalle_vehiculo(request, vehiculo_id):
     
     vehiculo = get_object_or_404(Vehiculo, id=vehiculo_id)
     asignaciones = vehiculo.asignaciones.all()[:10]
-    mantenimientos = vehiculo.mantenimientos.all()[:10]
     
     context = {
         'vehiculo': vehiculo,
         'asignaciones': asignaciones,
-        'mantenimientos': mantenimientos,
     }
     
     return render(request, 'vehiculos/detalle_vehiculo.html', context)
@@ -93,26 +87,3 @@ def lista_asignaciones(request):
     }
     
     return render(request, 'vehiculos/lista_asignaciones.html', context)
-
-
-@login_required
-def lista_mantenimientos(request):
-    """Lista de mantenimientos con filtro de pendientes/completados"""
-    
-    filtro = request.GET.get('filtro', 'pendientes')
-    
-    if filtro == 'pendientes':
-        mantenimientos = Mantenimiento.objects.filter(completado=False)
-    elif filtro == 'completados':
-        mantenimientos = Mantenimiento.objects.filter(completado=True)
-    else:
-        mantenimientos = Mantenimiento.objects.all()
-    
-    mantenimientos = mantenimientos.select_related('vehiculo')
-    
-    context = {
-        'mantenimientos': mantenimientos,
-        'filtro': filtro,
-    }
-    
-    return render(request, 'vehiculos/lista_mantenimientos.html', context)

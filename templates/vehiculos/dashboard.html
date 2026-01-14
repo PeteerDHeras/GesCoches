@@ -30,17 +30,50 @@
                 <p class="stat-number">{{ en_uso }}</p>
             </div>
         </div>
-        
-        <div class="stat-card mantenimiento">
-            <div class="stat-icon">🔧</div>
-            <div class="stat-content">
-                <h3>Mantenimiento</h3>
-                <p class="stat-number">{{ en_mantenimiento }}</p>
-            </div>
-        </div>
     </div>
 
     <div class="dashboard-sections">
+        <div class="section full-width">
+            <h3>Lista de Vehículos</h3>
+            {% if vehiculos %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Matrícula</th>
+                        <th>Marca/Modelo</th>
+                        <th>Color</th>
+                        <th>Año</th>
+                        <th>Estado</th>
+                        <th>Kilometraje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vehiculo in vehiculos %}
+                    <tr>
+                        <td><strong>{{ vehiculo.matricula }}</strong></td>
+                        <td>{{ vehiculo.marca }} {{ vehiculo.modelo }}</td>
+                        <td>{{ vehiculo.color }}</td>
+                        <td>{{ vehiculo.año }}</td>
+                        <td>
+                            {% if vehiculo.estado == 'DISPONIBLE' %}
+                                <span class="badge badge-disponible">✅ Disponible</span>
+                            {% elif vehiculo.estado == 'EN_USO' %}
+                                <span class="badge badge-en-uso">🔑 En Uso</span>
+                            {% elif vehiculo.estado == 'BAJA' %}
+                                <span class="badge badge-baja">❌ Baja</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ vehiculo.kilometraje|default:"0" }} km</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="{% url 'vehiculos:lista_vehiculos' %}" class="btn btn-link">Ver detalles de vehículos →</a>
+            {% else %}
+            <p class="no-data">No hay vehículos registrados</p>
+            {% endif %}
+        </div>
+
         <div class="section">
             <h3>Asignaciones Activas</h3>
             {% if asignaciones_activas %}
@@ -67,35 +100,6 @@
             <a href="{% url 'vehiculos:lista_asignaciones' %}" class="btn btn-link">Ver todas las asignaciones →</a>
             {% else %}
             <p class="no-data">No hay asignaciones activas</p>
-            {% endif %}
-        </div>
-
-        <div class="section">
-            <h3>Mantenimientos Pendientes</h3>
-            {% if mantenimientos_pendientes %}
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Vehículo</th>
-                        <th>Tipo</th>
-                        <th>Fecha Entrada</th>
-                        <th>Coste</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for mantenimiento in mantenimientos_pendientes %}
-                    <tr>
-                        <td><strong>{{ mantenimiento.vehiculo.matricula }}</strong></td>
-                        <td>{{ mantenimiento.get_tipo_display }}</td>
-                        <td>{{ mantenimiento.fecha_entrada|date:"d/m/Y" }}</td>
-                        <td>{{ mantenimiento.coste }} €</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <a href="{% url 'vehiculos:lista_mantenimientos' %}" class="btn btn-link">Ver todos los mantenimientos →</a>
-            {% else %}
-            <p class="no-data">No hay mantenimientos pendientes</p>
             {% endif %}
         </div>
     </div>

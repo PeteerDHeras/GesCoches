@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'gescoches.wsgi.application'
 
 # PostgreSQL para producción (Render)
 if config('DEBUG', default=True, cast=bool):
-    # Desarrollo: SQLite
+    # Desarrollo local: SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -88,11 +88,12 @@ if config('DEBUG', default=True, cast=bool):
         }
     }
 else:
-    # Producción: PostgreSQL desde DATABASE_URL
+    # Producción: PostgreSQL AIVEN desde DATABASE_URL
     DATABASES = {
         'default': dj_database_url.config(
             default=config('DATABASE_URL', default=''),
             conn_max_age=600,
+            conn_health_checks=True,
         )
     }
 

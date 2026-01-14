@@ -129,7 +129,7 @@ body {
 /* Dashboard Sections */
 .dashboard-sections {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    grid-template-columns: 1fr;
     gap: 2rem;
 }
 
@@ -138,6 +138,10 @@ body {
     padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.section.full-width {
+    grid-column: 1 / -1;
 }
 
 .section h3 {
@@ -195,14 +199,9 @@ body {
     color: #155724;
 }
 
-.badge-en_uso {
+.badge-en-uso {
     background-color: #cce5ff;
     color: #004085;
-}
-
-.badge-mantenimiento {
-    background-color: #fff3cd;
-    color: #856404;
 }
 
 .badge-baja {

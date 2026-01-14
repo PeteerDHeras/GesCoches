@@ -3,7 +3,7 @@ from django.db.models import Count, Q
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils import timezone
-from .models import Vehiculo, Asignacion, Mantenimiento, EstadoVehiculo
+from .models import Vehiculo, Asignacion, EstadoVehiculo
 
 
 @admin.register(Vehiculo)
@@ -37,7 +37,7 @@ class VehiculoAdmin(admin.ModelAdmin):
         }),
     )
     
-    actions = ['marcar_disponible', 'marcar_mantenimiento', 'marcar_baja']
+    actions = ['marcar_disponible', 'marcar_baja']
     
     def marca_modelo(self, obj):
         return f"{obj.marca} {obj.modelo}"
@@ -47,7 +47,6 @@ class VehiculoAdmin(admin.ModelAdmin):
         colors = {
             EstadoVehiculo.DISPONIBLE: '#28a745',
             EstadoVehiculo.EN_USO: '#007bff',
-            EstadoVehiculo.MANTENIMIENTO: '#ffc107',
             EstadoVehiculo.BAJA: '#6c757d',
         }
         color = colors.get(obj.estado, '#6c757d')
@@ -79,11 +78,6 @@ class VehiculoAdmin(admin.ModelAdmin):
         updated = queryset.update(estado=EstadoVehiculo.DISPONIBLE)
         self.message_user(request, f'{updated} vehículo(s) marcado(s) como disponible(s).')
     marcar_disponible.short_description = "Marcar como Disponible"
-    
-    def marcar_mantenimiento(self, request, queryset):
-        updated = queryset.update(estado=EstadoVehiculo.MANTENIMIENTO)
-        self.message_user(request, f'{updated} vehículo(s) marcado(s) en Mantenimiento.')
-    marcar_mantenimiento.short_description = "Marcar en Mantenimiento"
     
     def marcar_baja(self, request, queryset):
         updated = queryset.update(estado=EstadoVehiculo.BAJA)
@@ -149,59 +143,6 @@ class AsignacionAdmin(admin.ModelAdmin):
                 count += 1
         self.message_user(request, f'{count} asignación(es) finalizada(s).')
     finalizar_asignaciones.short_description = "Finalizar Asignaciones Seleccionadas"
-
-
-@admin.register(Mantenimiento)
-class MantenimientoAdmin(admin.ModelAdmin):
-    list_display = [
-        'vehiculo',
-        'tipo',
-        'fecha_entrada',
-        'fecha_salida',
-        'coste',
-        'estado_trabajo',
-        'taller'
-    ]
-    list_filter = ['completado', 'tipo', 'fecha_entrada']
-    search_fields = ['vehiculo__matricula', 'descripcion', 'taller']
-    date_hierarchy = 'fecha_entrada'
-    ordering = ['-fecha_entrada']
-    
-    fieldsets = (
-        ('Vehículo y Tipo', {
-            'fields': ('vehiculo', 'tipo')
-        }),
-        ('Fechas', {
-            'fields': ('fecha_entrada', 'fecha_salida')
-        }),
-        ('Detalles del Trabajo', {
-            'fields': ('descripcion', 'taller', 'coste')
-        }),
-        ('Estado', {
-            'fields': ('completado',)
-        }),
-    )
-    
-    actions = ['marcar_completado']
-    
-    def estado_trabajo(self, obj):
-        if obj.completado:
-            return format_html(
-                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px; font-weight: bold;">✓ Completado</span>'
-            )
-        else:
-            return format_html(
-                '<span style="background-color: #ffc107; color: black; padding: 3px 10px; border-radius: 3px; font-weight: bold;">⏳ En Curso</span>'
-            )
-    estado_trabajo.short_description = 'Estado'
-    
-    def marcar_completado(self, request, queryset):
-        count = 0
-        for mantenimiento in queryset.filter(completado=False):
-            mantenimiento.finalizar()
-            count += 1
-        self.message_user(request, f'{count} mantenimiento(s) marcado(s) como completado(s).')
-    marcar_completado.short_description = "Marcar como Completado"
 
 
 # Personalización del Admin Site
