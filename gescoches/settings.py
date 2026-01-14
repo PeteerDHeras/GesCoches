@@ -26,7 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production-key-12345678')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+# Default to False so cloud envs don't fall back to SQLite when env vars are missing.
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
@@ -78,23 +79,23 @@ WSGI_APPLICATION = 'gescoches.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# PostgreSQL para producción (Render)
-if config('DEBUG', default=True, cast=bool):
-    # Desarrollo local: SQLite
+# Prefer DATABASE_URL if present (Render/Aiven). Fallback to SQLite for local dev.
+DATABASE_URL = config('DATABASE_URL', default='')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
-    }
-else:
-    # Producción: PostgreSQL AIVEN desde DATABASE_URL
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=config('DATABASE_URL', default=''),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
     }
 
 
