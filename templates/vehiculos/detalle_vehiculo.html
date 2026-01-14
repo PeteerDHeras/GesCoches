@@ -94,40 +94,6 @@
         <p class="no-data">Sin asignaciones registradas</p>
         {% endif %}
     </div>
-
-    <div class="detail-card">
-        <h3>Historial de Mantenimientos</h3>
-        {% if mantenimientos %}
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Tipo</th>
-                    <th>Fecha</th>
-                    <th>Coste</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for mantenimiento in mantenimientos %}
-                <tr>
-                    <td>{{ mantenimiento.get_tipo_display }}</td>
-                    <td>{{ mantenimiento.fecha_entrada|date:"d/m/Y" }}</td>
-                    <td>{{ mantenimiento.coste }} €</td>
-                    <td>
-                        {% if mantenimiento.completado %}
-                        <span class="badge badge-disponible">Completado</span>
-                        {% else %}
-                        <span class="badge badge-mantenimiento">En curso</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p class="no-data">Sin mantenimientos registrados</p>
-        {% endif %}
-    </div>
 </div>
 
 <a href="{% url 'vehiculos:lista_vehiculos' %}" class="btn btn-secondary">← Volver a la lista</a>

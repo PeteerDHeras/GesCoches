@@ -8,11 +8,9 @@ Sistema profesional para la gestión interna de vehículos de sustitución, desa
 - **Estados de Vehículos**: 
   - Disponible
   - En Uso
-  - Mantenimiento/Reparación
   - Dado de Baja
 - **Asignaciones**: Registro completo de asignaciones a clientes
-- **Mantenimientos**: Seguimiento de revisiones y reparaciones
-- **Dashboard**: Vista general con estadísticas en tiempo real
+- **Dashboard**: Vista general con estadísticas y listado de vehículos
 - **Panel de Administración**: Interface personalizada de Django Admin
 - **Validación de Matrículas**: Formato español automático
 
@@ -111,8 +109,8 @@ La aplicación estará disponible en: `http://127.0.0.1:8000/`
 
 #### Dashboard
 - Visualización de estadísticas de vehículos por estado
+- Lista completa de vehículos con estados
 - Listado de asignaciones activas
-- Mantenimientos pendientes
 
 #### Gestión de Vehículos
 - Alta/baja de vehículos
@@ -126,11 +124,7 @@ La aplicación estará disponible en: `http://127.0.0.1:8000/`
 - Registro de kilometraje de entrada/salida
 - Historial por vehículo
 
-#### Mantenimientos
-- Programar mantenimientos
-- Tipos: Revisión, Reparación, ITV, Neumáticos, Otros
-- Control de costes
-- Registro de talleres
+
 
 ## 📊 Estructura del Proyecto
 
