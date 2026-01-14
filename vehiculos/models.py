@@ -167,6 +167,12 @@ def actualizar_estado_vehiculo_en_asignacion(sender, instance, created, **kwargs
             activa=True
         ).exclude(id=instance.id).exists()
         
+        # Si se registraron kilómetros de entrada, sincronizar con el vehículo
+        if instance.kilometraje_entrada is not None:
+            if instance.vehiculo.kilometraje != instance.kilometraje_entrada:
+                instance.vehiculo.kilometraje = instance.kilometraje_entrada
+                instance.vehiculo.save(update_fields=['kilometraje'])
+
         if not tiene_otras_asignaciones_activas:
             # No hay otras asignaciones activas, marcar como DISPONIBLE
             if instance.vehiculo.estado != EstadoVehiculo.DISPONIBLE:

@@ -33,7 +33,7 @@
     </div>
 
     <div class="dashboard-sections">
-        <div class="section full-width">
+        <div class="section">
             <h3>Lista de Vehículos</h3>
             {% if vehiculos %}
             <table class="data-table">
@@ -80,19 +80,25 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Vehículo</th>
-                        <th>Cliente</th>
-                        <th>Fecha Inicio</th>
-                        <th>Km Salida</th>
+                        <th>Matrícula</th>
+                        <th>Modelo</th>
+                        <th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for asignacion in asignaciones_activas %}
                     <tr>
                         <td><strong>{{ asignacion.vehiculo.matricula }}</strong></td>
-                        <td>{{ asignacion.cliente }}</td>
-                        <td>{{ asignacion.fecha_inicio|date:"d/m/Y H:i" }}</td>
-                        <td>{{ asignacion.kilometraje_salida }} km</td>
+                        <td>{{ asignacion.vehiculo.marca }} {{ asignacion.vehiculo.modelo }}</td>
+                        <td>
+                            {% if asignacion.vehiculo.estado == 'DISPONIBLE' %}
+                                <span class="badge badge-disponible">✅ Disponible</span>
+                            {% elif asignacion.vehiculo.estado == 'EN_USO' %}
+                                <span class="badge badge-en-uso">🔑 En Uso</span>
+                            {% elif asignacion.vehiculo.estado == 'BAJA' %}
+                                <span class="badge badge-baja">❌ Baja</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
