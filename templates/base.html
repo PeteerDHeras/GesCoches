@@ -17,7 +17,7 @@
                 <li><a href="{% url 'vehiculos:dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
                 <li><a href="{% url 'vehiculos:lista_vehiculos' %}" {% if request.resolver_match.url_name == 'lista_vehiculos' %}class="active"{% endif %}>Vehículos</a></li>
                 <li><a href="{% url 'vehiculos:lista_asignaciones' %}" {% if request.resolver_match.url_name == 'lista_asignaciones' %}class="active"{% endif %}>Asignaciones</a></li>
-                <li><a href="/admin/">Admin</a></li>
+                <li><a href="{% url 'admin:login' %}?next={% url 'vehiculos:dashboard' %}">Admin</a></li>
             </ul>
             <div class="nav-user">
                 <span>👤 {{ user.username }}</span>

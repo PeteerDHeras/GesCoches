@@ -177,9 +177,4 @@ admin.site.site_title = 'GesCoches Admin'
 admin.site.index_title = 'Panel de Control de Vehículos de Sustitución'
 
 
-# Redirige la portada del admin al dashboard público tras el login
-def _admin_index_redirect(self, request, extra_context=None):
-    return HttpResponseRedirect(reverse('vehiculos:dashboard'))
-
-
-admin.site.index = _admin_index_redirect.__get__(admin.site, admin.site.__class__)
+# Dejar el index del admin por defecto para poder acceder al panel; el login puede redirigir con next param desde la navbar
