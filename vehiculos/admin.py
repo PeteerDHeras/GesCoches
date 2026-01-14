@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.db.models import Count, Q
 from django.utils.html import format_html
 from django.urls import reverse
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from .models import Vehiculo, Asignacion, EstadoVehiculo
 
@@ -84,6 +85,20 @@ class VehiculoAdmin(admin.ModelAdmin):
         self.message_user(request, f'{updated} vehículo(s) dado(s) de baja.')
     marcar_baja.short_description = "Dar de Baja"
 
+    # Al guardar, redirigir al detalle público del vehículo (no quedarse en admin)
+    def _redirect_to_public_detail(self, obj):
+        return HttpResponseRedirect(reverse('vehiculos:detalle_vehiculo', args=[obj.pk]))
+
+    def response_add(self, request, obj, post_url_continue=None):
+        if '_continue' not in request.POST and '_addanother' not in request.POST:
+            return self._redirect_to_public_detail(obj)
+        return super().response_add(request, obj, post_url_continue)
+
+    def response_change(self, request, obj):
+        if '_continue' not in request.POST and '_addanother' not in request.POST:
+            return self._redirect_to_public_detail(obj)
+        return super().response_change(request, obj)
+
 
 @admin.register(Asignacion)
 class AsignacionAdmin(admin.ModelAdmin):
@@ -143,6 +158,17 @@ class AsignacionAdmin(admin.ModelAdmin):
                 count += 1
         self.message_user(request, f'{count} asignación(es) finalizada(s).')
     finalizar_asignaciones.short_description = "Finalizar Asignaciones Seleccionadas"
+
+    # Al guardar, redirigir al listado público de asignaciones
+    def response_add(self, request, obj, post_url_continue=None):
+        if '_continue' not in request.POST and '_addanother' not in request.POST:
+            return HttpResponseRedirect(reverse('vehiculos:lista_asignaciones'))
+        return super().response_add(request, obj, post_url_continue)
+
+    def response_change(self, request, obj):
+        if '_continue' not in request.POST and '_addanother' not in request.POST:
+            return HttpResponseRedirect(reverse('vehiculos:lista_asignaciones'))
+        return super().response_change(request, obj)
 
 
 # Personalización del Admin Site
