@@ -85,18 +85,18 @@ class VehiculoAdmin(admin.ModelAdmin):
         self.message_user(request, f'{updated} vehículo(s) dado(s) de baja.')
     marcar_baja.short_description = "Dar de Baja"
 
-    # Al guardar, redirigir al detalle público del vehículo (no quedarse en admin)
-    def _redirect_to_public_detail(self, obj):
-        return HttpResponseRedirect(reverse('vehiculos:detalle_vehiculo', args=[obj.pk]))
+    # Al guardar, redirigir al dashboard (no quedarse en admin)
+    def _redirect_to_dashboard(self):
+        return HttpResponseRedirect(reverse('vehiculos:dashboard'))
 
     def response_add(self, request, obj, post_url_continue=None):
         if '_continue' not in request.POST and '_addanother' not in request.POST:
-            return self._redirect_to_public_detail(obj)
+            return self._redirect_to_dashboard()
         return super().response_add(request, obj, post_url_continue)
 
     def response_change(self, request, obj):
         if '_continue' not in request.POST and '_addanother' not in request.POST:
-            return self._redirect_to_public_detail(obj)
+            return self._redirect_to_dashboard()
         return super().response_change(request, obj)
 
 
@@ -159,15 +159,15 @@ class AsignacionAdmin(admin.ModelAdmin):
         self.message_user(request, f'{count} asignación(es) finalizada(s).')
     finalizar_asignaciones.short_description = "Finalizar Asignaciones Seleccionadas"
 
-    # Al guardar, redirigir al listado público de asignaciones
+    # Al guardar, redirigir al dashboard
     def response_add(self, request, obj, post_url_continue=None):
         if '_continue' not in request.POST and '_addanother' not in request.POST:
-            return HttpResponseRedirect(reverse('vehiculos:lista_asignaciones'))
+            return HttpResponseRedirect(reverse('vehiculos:dashboard'))
         return super().response_add(request, obj, post_url_continue)
 
     def response_change(self, request, obj):
         if '_continue' not in request.POST and '_addanother' not in request.POST:
-            return HttpResponseRedirect(reverse('vehiculos:lista_asignaciones'))
+            return HttpResponseRedirect(reverse('vehiculos:dashboard'))
         return super().response_change(request, obj)
 
 
@@ -175,3 +175,11 @@ class AsignacionAdmin(admin.ModelAdmin):
 admin.site.site_header = 'GesCoches - Gestión de Vehículos'
 admin.site.site_title = 'GesCoches Admin'
 admin.site.index_title = 'Panel de Control de Vehículos de Sustitución'
+
+
+# Redirige la portada del admin al dashboard público tras el login
+def _admin_index_redirect(self, request, extra_context=None):
+    return HttpResponseRedirect(reverse('vehiculos:dashboard'))
+
+
+admin.site.index = _admin_index_redirect.__get__(admin.site, admin.site.__class__)
