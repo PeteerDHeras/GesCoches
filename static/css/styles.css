@@ -199,7 +199,8 @@ body {
     color: #155724;
 }
 
-.badge-en-uso {
+.badge-en-uso,
+.badge-en_uso {
     background-color: #cce5ff;
     color: #004085;
 }

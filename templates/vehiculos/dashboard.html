@@ -83,6 +83,7 @@
                         <th>Matrícula</th>
                         <th>Modelo</th>
                         <th>Estado</th>
+                        <th>Cliente</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -99,6 +100,7 @@
                                 <span class="badge badge-baja">❌ Baja</span>
                             {% endif %}
                         </td>
+                        <td>{{ asignacion.cliente }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

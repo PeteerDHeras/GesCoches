@@ -1,0 +1,133 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Limpiar Asignaciones - GesCoches Admin{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="app-container">
+        <h1>🧹 Limpiar Asignaciones Finalizadas</h1>
+        
+        {% if messages %}
+        <div class="messagelist">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div style="background: white; padding: 20px; border-radius: 5px; margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            {% if cantidad > 0 %}
+                <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                    <h3 style="margin-top: 0; color: #856404;">⚠️ Advertencia</h3>
+                    <p style="margin: 10px 0;">
+                        Se encontraron <strong>{{ cantidad }}</strong> asignaciones finalizadas hace más de <strong>{{ semanas }} semana(s)</strong>.
+                    </p>
+                    <p style="margin: 10px 0; color: #666;">
+                        <strong>Fecha límite:</strong> {{ fecha_limite|date:"d/m/Y H:i" }}
+                    </p>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #007bff;">
+                    <h4 style="margin-top: 0;">Asignaciones a eliminar:</h4>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        {% for asignacion in asignaciones %}
+                        <li>
+                            <strong>{{ asignacion.vehiculo.matricula }}</strong> 
+                            ({{ asignacion.cliente }})
+                            - Finalizada: {{ asignacion.fecha_fin|date:"d/m/Y" }}
+                        </li>
+                        {% endfor %}
+                        {% if cantidad > total_mostrado %}
+                        <li style="color: #666; font-style: italic;">... y {{ cantidad|add:"-"total_mostrado }} más</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <form method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="confirmar" value="si">
+                        <button type="submit" class="button default" style="background-color: #dc3545; border-color: #dc3545; padding: 10px 20px; cursor: pointer;">
+                            ✅ Confirmar eliminación ({{ cantidad }} registros)
+                        </button>
+                    </form>
+                    
+                    <a href="{% url 'admin:vehiculos_asignacion_changelist' %}" class="button" style="padding: 10px 20px;">
+                        ❌ Cancelar
+                    </a>
+                </div>
+                
+            {% else %}
+                <div style="background: #d4edda; border: 1px solid #28a745; padding: 15px; border-radius: 5px;">
+                    <h3 style="margin-top: 0; color: #155724;">✅ Nada que eliminar</h3>
+                    <p style="margin: 10px 0;">No hay asignaciones finalizadas anterior a {{ fecha_limite|date:"d/m/Y" }}</p>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <a href="{% url 'admin:vehiculos_asignacion_changelist' %}" class="button default">
+                        ← Volver a Asignaciones
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <hr style="margin-top: 40px;">
+        
+        <div style="background: #f0f7ff; padding: 15px; border-radius: 5px; border-left: 4px solid #17a2b8;">
+            <h4>ℹ️ Información:</h4>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Las asignaciones finalizadas de hace más de <strong>3 semanas</strong> se consideran antiguas.</li>
+                <li>Este proceso solo afecta asignaciones con estado <strong>"Finalizada"</strong>.</li>
+                <li>Una vez eliminadas, los registros <strong>no podrán recuperarse</strong>.</li>
+                <li>Se mantiene un historial en la base de datos antes de la eliminación.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    .app-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .alert {
+        padding: 12px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .button {
+        background-color: #417690;
+        color: white;
+        border: 1px solid #417690;
+        border-radius: 4px;
+        padding: 8px 16px;
+        text-decoration: none;
+        cursor: pointer;
+        display: inline-block;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+    
+    .button:hover {
+        background-color: #2e5768;
+    }
+    
+    .button.default {
+        background-color: #008cba;
+        border-color: #008cba;
+    }
+    
+    .button.default:hover {
+        background-color: #007399;
+    }
+</style>
+{% endblock %}

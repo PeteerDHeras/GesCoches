@@ -41,9 +41,13 @@
             <td>{{ vehiculo.color }}</td>
             <td>{{ vehiculo.año }}</td>
             <td>
-                <span class="badge badge-{{ vehiculo.estado|lower }}">
-                    {{ vehiculo.get_estado_display }}
-                </span>
+                {% if vehiculo.estado == 'DISPONIBLE' %}
+                    <span class="badge badge-disponible">✅ {{ vehiculo.get_estado_display }}</span>
+                {% elif vehiculo.estado == 'EN_USO' %}
+                    <span class="badge badge-en-uso">🔑 {{ vehiculo.get_estado_display }}</span>
+                {% elif vehiculo.estado == 'BAJA' %}
+                    <span class="badge badge-baja">❌ {{ vehiculo.get_estado_display }}</span>
+                {% endif %}
             </td>
             <td>{{ vehiculo.kilometraje }} km</td>
             <td>

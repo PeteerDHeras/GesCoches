@@ -169,6 +169,12 @@ class AsignacionAdmin(admin.ModelAdmin):
         if '_continue' not in request.POST and '_addanother' not in request.POST:
             return HttpResponseRedirect(reverse('vehiculos:dashboard'))
         return super().response_change(request, obj)
+    
+    def changelist_view(self, request, extra_context=None):
+        """Agregar botón de limpieza en la vista de lista"""
+        extra_context = extra_context or {}
+        extra_context['limpiar_asignaciones_url'] = reverse('vehiculos:limpiar_asignaciones_admin')
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 # Personalización del Admin Site

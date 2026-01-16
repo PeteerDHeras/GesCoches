@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from datetime import timedelta
 
 
 class EstadoVehiculo(models.TextChoices):
@@ -146,6 +147,47 @@ class Asignacion(models.Model):
         self.vehiculo.kilometraje = kilometraje_entrada
         self.vehiculo.estado = EstadoVehiculo.DISPONIBLE
         self.vehiculo.save()
+
+    @staticmethod
+    def limpiar_asignaciones_antiguas(semanas=3):
+        """
+        SISTEMA DE LIMPIEZA - Elimina asignaciones finalizadas de hace más de N semanas.
+        
+        Uso:
+            # Borrar asignaciones finalizadas hace más de 3 semanas
+            from vehiculos.models import Asignacion
+            asignaciones_borradas = Asignacion.limpiar_asignaciones_antiguas(semanas=3)
+            print(f"Se borraron {asignaciones_borradas} asignaciones antiguas")
+        
+        Alternativa: Management Command
+        # Crear archivo: vehiculos/management/commands/limpiar_asignaciones.py
+        # Y ejecutar: python manage.py limpiar_asignaciones --semanas=3
+        """
+        # Calcular fecha límite
+        fecha_limite = timezone.now() - timedelta(weeks=semanas)
+        
+        # Obtener asignaciones a eliminar
+        asignaciones_a_eliminar = Asignacion.objects.filter(
+            activa=False,
+            fecha_fin__lt=fecha_limite
+        )
+        
+        cantidad = asignaciones_a_eliminar.count()
+        
+        # Información para logging
+        if cantidad > 0:
+            print(f"⚠️  Se van a eliminar {cantidad} asignaciones finalizadas hace más de {semanas} semanas")
+            print(f"   Fecha límite: {fecha_limite.strftime('%d/%m/%Y %H:%M')}")
+            
+            # DESCOMENTA LA SIGUIENTE LÍNEA PARA EJECUTAR LA LIMPIEZA:
+            # asignaciones_a_eliminar.delete()
+            # print(f"✅ Se eliminaron {cantidad} asignaciones exitosamente")
+            
+            print("   Para ejecutar la limpieza, descomenta la línea de delete() en el código")
+        else:
+            print(f"✅ No hay asignaciones para eliminar (anterior a {fecha_limite.strftime('%d/%m/%Y')})")
+        
+        return cantidad
 
 
 # Signals para automatizar estados de vehículos

@@ -1,0 +1,23 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content_title %}
+<h1 style="display: flex; justify-content: space-between; align-items: center;">
+    <span>{{ opts.verbose_name_plural|capfirst }}</span>
+    {% if limpiar_asignaciones_url %}
+    <a href="{{ limpiar_asignaciones_url }}" class="button" style="background-color: #ff9800; margin: 0; padding: 8px 16px;">
+        🧹 Limpiar antiguas
+    </a>
+    {% endif %}
+</h1>
+{% endblock %}
+
+{% block search %}
+{{ block.super }}
+{% if limpiar_asignaciones_url %}
+<div style="background: #fff3cd; border: 1px solid #ffc107; padding: 10px; border-radius: 4px; margin-top: 10px; display: flex; align-items: center; gap: 15px;">
+    <span style="color: #856404;">💡 Consejo: Usa el botón <strong>"🧹 Limpiar antiguas"</strong> en la parte superior para eliminar asignaciones finalizadas hace más de 3 semanas.</span>
+</div>
+{% endif %}
+{% endblock %}
+

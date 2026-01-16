@@ -2,7 +2,74 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
 from django.contrib import messages
+from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.urls import reverse
 from .models import Vehiculo, Asignacion, EstadoVehiculo
+
+
+# SISTEMA DE LIMPIEZA DE ASIGNACIONES ANTIGUAS
+# =============================================
+# Para limpiar asignaciones finalizadas de hace más de 3 semanas, usa cualquiera de estos métodos:
+#
+# OPCIÓN 1: Management Command (RECOMENDADO)
+#   python manage.py limpiar_asignaciones --semanas=3
+#   python manage.py limpiar_asignaciones --semanas=3 --confirmar  # Para ejecutar de verdad
+#
+# OPCIÓN 2: Llamada directa en el shell de Django
+#   python manage.py shell
+#   >>> from vehiculos.models import Asignacion
+#   >>> Asignacion.limpiar_asignaciones_antiguas(semanas=3)
+#
+# OPCIÓN 3: Desde una tarea programada (Celery)
+#   Agregar una tarea periódica que ejecute:
+#   Asignacion.limpiar_asignaciones_antiguas(semanas=3)
+#
+# OPCIÓN 4: Botón en el Admin de Django (VER ABAJO)
+#   ↓↓↓
+#
+
+
+@login_required
+def limpiar_asignaciones_admin(request):
+    """
+    Vista para limpiar asignaciones antiguas desde el admin de Django.
+    Solo accesible a usuarios staff (admin).
+    """
+    # Verificar permisos de staff
+    if not request.user.is_staff:
+        return HttpResponseForbidden("No tienes permisos para acceder a esta página")
+    
+    semanas = int(request.GET.get('semanas', 3))
+    
+    # Calcular fecha límite
+    from django.utils import timezone
+    from datetime import timedelta
+    fecha_limite = timezone.now() - timedelta(weeks=semanas)
+    
+    # Obtener asignaciones a eliminar
+    asignaciones_a_eliminar = Asignacion.objects.filter(
+        activa=False,
+        fecha_fin__lt=fecha_limite
+    )
+    
+    cantidad = asignaciones_a_eliminar.count()
+    
+    if request.method == 'POST' and request.POST.get('confirmar') == 'si':
+        # Ejecutar eliminación
+        asignaciones_a_eliminar.delete()
+        messages.success(request, f'✅ Se eliminaron {cantidad} asignaciones finalizadas hace más de {semanas} semanas.')
+        return HttpResponseRedirect(reverse('admin:vehiculos_asignacion_changelist'))
+    
+    # Mostrar confirmación
+    context = {
+        'cantidad': cantidad,
+        'semanas': semanas,
+        'fecha_limite': fecha_limite,
+        'asignaciones': asignaciones_a_eliminar[:20],
+        'total_mostrado': min(20, cantidad),
+    }
+    
+    return render(request, 'admin/limpiar_asignaciones.html', context)
 
 
 @login_required
